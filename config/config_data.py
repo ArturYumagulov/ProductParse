@@ -1,4 +1,4 @@
-DATA_FILE: str = 'data/data.xlsx'
+DATA_FILE: str = 'data/sakura.xlsx'
 
 TTS_CONF: dict[str:str] = {
     'url': 'http://id12740.public.api.abcp.ru',
@@ -14,9 +14,15 @@ PARTKOM_CONF: dict[str:str] = {
 }
 BRANDS: dict[str:str] = {
     'PARTKOM': {
-        'Mann': 'MANN'
+        'Mann': 'MANN',
+        'Sakura': 'SAKURA'
     },
     'ROSSKO': {
-        'Mann': 'Mann'
+        'Mann': 'Mann',
+        'Sakura': 'Sakura'
+    },
+    'TTS': {
+        'Mann': 'MANN-FILTER',
+        'Sakura': 'Sakura'
     }
 }
