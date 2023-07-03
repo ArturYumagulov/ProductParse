@@ -18,6 +18,10 @@ MOSKVORECHIE_CONF: dict[str:str] = {
     'url': 'https://portal.moskvorechie.ru/portal.api',
 }
 
+AutoEURO_CONF: dict[str:str] = {
+    'url': 'https://api.autoeuro.ru/api/v2/json/search_items/',
+}
+
 BRANDS: dict[str:str] = {
     'PARTKOM': {
         'Mann': 'MANN',
@@ -37,5 +41,11 @@ BRANDS: dict[str:str] = {
     "MOSKVORECHIE": {
         'Mann': "Mann-filter",
         'BIG FILTER': 'BIG FILTER'
+    },
+    "AutoEURO": {
+        'Mann': "MANN-FILTER",
+        'BIG FILTER': 'BIG FILTER',
+        'Sakura': 'SAKURA',
+        'Mahle/Knecht': "MAHLE"
     }
 }

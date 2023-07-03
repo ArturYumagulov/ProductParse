@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 
+from parsers.autoeuro import autoeuro
 from parsers.moskvorechie import moskvorechie
 from parsers.rossko import rossko
 from parsers.partkom import partkom
@@ -58,8 +59,6 @@ def run(brand_name: str):
 
     article = [str(product.vendor_code).strip() for product in products]
 
-    # products = excel_reader(filename, pagename=page_name, column=column)  # Данные с 1С (Артикула-Файл)
-
     partkom_data = partkom(article, BRANDS['PARTKOM'][brand_name])
     create_or_update(partkom_data, platform="Partkom", brand=BRANDS['PARTKOM'][brand_name])
 
@@ -69,12 +68,15 @@ def run(brand_name: str):
     moskvorechie_data = moskvorechie(article, BRANDS['MOSKVORECHIE'][brand_name])
     create_or_update(moskvorechie_data, platform="Moskvorechie", brand=BRANDS['MOSKVORECHIE'][brand_name])
 
+    autoeuro_data = autoeuro(article, BRANDS['AutoEURO'][brand_name])
+    create_or_update(autoeuro_data, platform="AutoEuro", brand=BRANDS['AutoEURO'][brand_name])
+
     tts_data = tts(article, BRANDS['TTS'][brand_name])
     create_or_update(tts_data, platform="TTS", brand=BRANDS['TTS'][brand_name])
 
-    def sort_func(products_list, result_dict):
+    def sort_func(result_dict):
         result_list = []
-        for item in products_list:
+        for item in article:
             if item in result_dict.keys():
                 result_list.append(result_dict[item])
             else:
@@ -86,12 +88,14 @@ def run(brand_name: str):
         'Tranzit-Закуп': [product.price for product in products],
         'Tranzit-Розница': [product.price_sc for product in products],
         'Tranzit-Опт': [product.price_retail for product in products],
-        'Part-kom': sort_func(article, partkom_data),
-        'Moskvorechie': sort_func(article, moskvorechie_data),
-        'Rossko': sort_func(article, rossko_data),
-        'ТТС': sort_func(article, tts_data),
+        'Part-kom': sort_func(partkom_data),
+        'Moskvorechie': sort_func(moskvorechie_data),
+        'AutoEuro': sort_func(autoeuro_data),
+        'Rossko': sort_func(rossko_data),
+        'ТТС': sort_func(tts_data),
         'Дата_мониторинга': [f"{date.day}-{date.month}-{date.year}" for _ in range(len(products))]
     }
+
     df = pd.DataFrame(data)
     df.to_excel(f"data\\price_min_{brand_name}_{date}.xlsx")
     print("Данные сохранены")
