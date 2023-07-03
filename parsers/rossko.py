@@ -1,7 +1,7 @@
 import zeep
 from environs import Env
 
-from config.config_data import ROSSKO_CONF
+from config.config_data import ROSSKO_CONF, ENV_PATH
 
 
 def rossko(product_list: list, brandname: str) -> dict:

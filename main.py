@@ -1,14 +1,18 @@
+import pandas as pd
+from environs import Env
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
-import pandas as pd
 
-from db.products_db import Products
+from parsers.moskvorechie import moskvorechie
 from parsers.rossko import rossko
 from parsers.partkom import partkom
 from parsers.tts import tts
-from services.utils.excel import excel_reader
-from config.config_data import DATA_FILE, BRANDS
+
+from db.products_db import Products
+from db.product_schema_1C import products_table
+
+from config.config_data import BRANDS
 
 
 def create_or_update(data: dict, platform: str, brand: str):
@@ -37,17 +41,35 @@ def create_or_update(data: dict, platform: str, brand: str):
             print(f"В базe обновлены данные {article}- {price}")
 
 
-def run(filename: str, page_name: str, column: str, brand_name: str):
-    date = datetime.now().date()
-    products = excel_reader(filename, pagename=page_name, column=column)  # Данные с 1С (Артикула)
+def run(brand_name: str):
 
-    partkom_data = partkom(products, BRANDS['PARTKOM'][brand_name])
+    date = datetime.now().date()
+    env = Env()
+    Env().read_env('parsers/.env')
+
+    tranzit_db = create_engine(
+        f"mssql+pymssql://{env('MSSQL_LOGIN')}:{env('MSSQL_PASSWORD')}@{env('MSSQL_HOST')}/Marketing")
+
+    session = sessionmaker(bind=tranzit_db)
+
+    tranzit_db_session = session()
+
+    products = tranzit_db_session.query(products_table).filter_by(brand=brand_name).all()  # Данные с 1С
+
+    article = [str(product.vendor_code).strip() for product in products]
+
+    # products = excel_reader(filename, pagename=page_name, column=column)  # Данные с 1С (Артикула-Файл)
+
+    partkom_data = partkom(article, BRANDS['PARTKOM'][brand_name])
     create_or_update(partkom_data, platform="Partkom", brand=BRANDS['PARTKOM'][brand_name])
 
-    rossko_data = rossko(products, BRANDS['ROSSKO'][brand_name])
+    rossko_data = rossko(article, BRANDS['ROSSKO'][brand_name])
     create_or_update(rossko_data, platform="Rossko", brand=BRANDS['ROSSKO'][brand_name])
 
-    tts_data = tts(products, BRANDS['TTS'][brand_name])
+    moskvorechie_data = moskvorechie(article, BRANDS['MOSKVORECHIE'][brand_name])
+    create_or_update(moskvorechie_data, platform="Moskvorechie", brand=BRANDS['MOSKVORECHIE'][brand_name])
+
+    tts_data = tts(article, BRANDS['TTS'][brand_name])
     create_or_update(tts_data, platform="TTS", brand=BRANDS['TTS'][brand_name])
 
     def sort_func(products_list, result_dict):
@@ -60,11 +82,15 @@ def run(filename: str, page_name: str, column: str, brand_name: str):
         return result_list
 
     data = {
-        'Артикул': [product for product in products],
-        'Part-kom': sort_func(products, partkom_data),
-        'Rossko': sort_func(products, rossko_data),
-        'ТТС': sort_func(products, tts_data),
-        'Дата_мониторинга': [f"{date.day}-{date.month}-{date.year}" for i in range(len(products))]
+        'Артикул': [product for product in article],
+        'Tranzit-Закуп': [product.price for product in products],
+        'Tranzit-Розница': [product.price_sc for product in products],
+        'Tranzit-Опт': [product.price_retail for product in products],
+        'Part-kom': sort_func(article, partkom_data),
+        'Moskvorechie': sort_func(article, moskvorechie_data),
+        'Rossko': sort_func(article, rossko_data),
+        'ТТС': sort_func(article, tts_data),
+        'Дата_мониторинга': [f"{date.day}-{date.month}-{date.year}" for _ in range(len(products))]
     }
     df = pd.DataFrame(data)
     df.to_excel(f"data\\price_min_{brand_name}_{date}.xlsx")
@@ -72,5 +98,4 @@ def run(filename: str, page_name: str, column: str, brand_name: str):
 
 
 if __name__ == '__main__':
-    run(DATA_FILE, page_name='list', column='A', brand_name='Sakura')
-    pass
+    run('BIG FILTER')

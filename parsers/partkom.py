@@ -2,7 +2,7 @@ import requests
 from environs import Env
 from requests.auth import HTTPBasicAuth
 
-from config.config_data import PARTKOM_CONF
+from config.config_data import PARTKOM_CONF, ENV_PATH
 
 
 def partkom(product_list: list, brand_name: str) -> dict:

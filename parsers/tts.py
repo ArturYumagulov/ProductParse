@@ -1,7 +1,7 @@
 import requests
 from environs import Env
 
-from config.config_data import TTS_CONF, DATA_FILE
+from config.config_data import TTS_CONF, ENV_PATH
 from services.utils.excel import excel_reader
 
 
