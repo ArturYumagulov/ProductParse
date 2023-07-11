@@ -46,7 +46,7 @@ def partkom(product_list: list, brand_name: str) -> dict:
             else:
                 print(f"Цена {product} - Нет товара - PartKom")
                 result_data[product] = "Нет товара"
-
+    # print(result_data)
     return result_data
 
 

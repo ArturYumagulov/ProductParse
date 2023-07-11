@@ -20,12 +20,17 @@ def moskvorechie(product_list: list, brand_name: str) -> dict:
 
         if isinstance(r.json()['result'], list):
             response = r.json()['result']
+            # print(response)
 
             if len(response) > 0:
                 prices = [item['price'] for item in response if item['brand'] == brand_name]
-                min_price = min(prices)
-                print(f"Цена {article} - {min_price} - Moskvorechie")
-                result_data[article] = min_price
+                if len(prices) > 0:
+                    min_price = min(prices)
+                    print(f"Цена {article} - {min_price} - Moskvorechie")
+                    result_data[article] = min_price
+                else:
+                    print(f"Цена {article} - Нет товара - Moskvorechie")
+                    result_data[article] = "Нет товара"
             else:
                 print(f"Цена {article} - Нет товара - Moskvorechie")
                 result_data[article] = "Нет товара"
@@ -37,4 +42,4 @@ def moskvorechie(product_list: list, brand_name: str) -> dict:
 
 
 if __name__ == '__main__':
-    moskvorechie(['w9142', ], BRANDS['MOSKVORECHIE']['Mann'])
+    moskvorechie(['CA25050'], BRANDS['MOSKVORECHIE']['Sakura'])

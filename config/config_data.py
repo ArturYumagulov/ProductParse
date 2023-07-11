@@ -21,31 +21,44 @@ MOSKVORECHIE_CONF: dict[str:str] = {
 AutoEURO_CONF: dict[str:str] = {
     'url': 'https://api.autoeuro.ru/api/v2/json/search_items/',
 }
+BERG_CONF: dict[str:str] = {
+    'url': 'https://api.berg.ru/',
+    'Brands': 'brands.json',
+    'price': 'get_stock.json',
+    'address': '7053'
+}
 
 BRANDS: dict[str:str] = {
     'PARTKOM': {
-        'Mann': 'MANN',
+        'MANN-FILTER': 'MANN',
         'Sakura': 'SAKURA',
         'BIG FILTER': 'BIGFILTER'
     },
     'ROSSKO': {
-        'Mann': 'Mann',
+        'MANN-FILTER': 'Mann',
         'Sakura': 'Sakura',
         'BIG FILTER': 'BIG Filter'
     },
     'TTS': {
-        'Mann': 'MANN-FILTER',
+        'MANN-FILTER': 'MANN-FILTER',
         'Sakura': 'Sakura',
         'BIG FILTER': 'BIG FILTER'
     },
     "MOSKVORECHIE": {
-        'Mann': "Mann-filter",
-        'BIG FILTER': 'BIG FILTER'
+        'MANN-FILTER': "Mann-filter",
+        'BIG FILTER': 'BIG FILTER',
+        'Sakura': 'SAKURA Automotive',
     },
     "AutoEURO": {
-        'Mann': "MANN-FILTER",
+        'MANN-FILTER': "MANN-FILTER",
         'BIG FILTER': 'BIG FILTER',
         'Sakura': 'SAKURA',
         'Mahle/Knecht': "MAHLE"
+    },
+    "BERG": {
+        'MANN-FILTER': "MANN",
+        'BIG FILTER': 'BIG FILTER',
+        'Sakura': 'Sakura',
+        'Mahle/Knecht': "KNECHT/MAHLE"
     }
 }
