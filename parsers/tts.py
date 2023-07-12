@@ -1,11 +1,12 @@
-import requests
+import httpx
+import asyncio
+
 from environs import Env
 
-from config.config_data import TTS_CONF, ENV_PATH
-from services.utils.excel import excel_reader
+from config.config_data import TTS_CONF
 
 
-def tts(products_list: list, brand_name: str):
+async def tts(products_list: list, brand_name: str):
     """Запрос к API TTS"""
 
     result_dict = {}
@@ -25,9 +26,11 @@ def tts(products_list: list, brand_name: str):
               f"number={article}&" \
               f"brand={brand_name}"
 
-        r = requests.get(url, headers)
+        async with httpx.AsyncClient() as requests:
+            r = await requests.get(url, headers=headers)
 
         response = r.json()
+
         if isinstance(response, list):
             for item in response:
                 if item['brand'] == brand_name:
@@ -41,5 +44,5 @@ def tts(products_list: list, brand_name: str):
 
 
 if __name__ == '__main__':
-    products = excel_reader('../data/sakura.xlsx', pagename='list', column='A')  # Данные с 1С (Артикула)
-    tts(products, brand_name="Sakura")
+    # products = excel_reader('../data/sakura.xlsx', pagename='list', column='A')  # Данные с 1С (Артикула)
+    asyncio.run(tts(['w914/2'], brand_name="Sakura"))

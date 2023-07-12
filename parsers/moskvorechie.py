@@ -1,9 +1,10 @@
-import requests
+import httpx
+import asyncio
 from config.config_data import MOSKVORECHIE_CONF, BRANDS, ENV_PATH
 from environs import Env
 
 
-def moskvorechie(product_list: list, brand_name: str) -> dict:
+async def moskvorechie(product_list: list, brand_name: str) -> dict:
 
     result_data = {}
 
@@ -16,30 +17,31 @@ def moskvorechie(product_list: list, brand_name: str) -> dict:
                   'p': env('MOSKVORECHIE_KEY'),
                   'act': 'price_by_nr_firm', 'nr': article, 'v': '1'}
 
-        r = requests.get(MOSKVORECHIE_CONF['url'], params=params)
+        async with httpx.AsyncClient() as requests:
+            r = await requests.get(MOSKVORECHIE_CONF['url'], params=params)
 
-        if isinstance(r.json()['result'], list):
-            response = r.json()['result']
-            # print(response)
+            if isinstance(r.json()['result'], list):
+                response = r.json()['result']
+                # print(response)
 
-            if len(response) > 0:
-                prices = [item['price'] for item in response if item['brand'] == brand_name]
-                if len(prices) > 0:
-                    min_price = min(prices)
-                    print(f"Цена {article} - {min_price} - Moskvorechie")
-                    result_data[article] = min_price
+                if len(response) > 0:
+                    prices = [item['price'] for item in response if item['brand'] == brand_name]
+                    if len(prices) > 0:
+                        min_price = min(prices)
+                        print(f"Цена {article} - {min_price} - Moskvorechie")
+                        result_data[article] = min_price
+                    else:
+                        print(f"Цена {article} - Нет товара - Moskvorechie")
+                        result_data[article] = "Нет товара"
                 else:
                     print(f"Цена {article} - Нет товара - Moskvorechie")
                     result_data[article] = "Нет товара"
             else:
-                print(f"Цена {article} - Нет товара - Moskvorechie")
-                result_data[article] = "Нет товара"
-        else:
-            print(f"Цена {article} - Неверный ключ - Moskvorechie")
-            result_data[article] = "Неверный ключ"
+                print(f"Цена {article} - Неверный ключ - Moskvorechie")
+                result_data[article] = "Неверный ключ"
 
     return result_data
 
 
 if __name__ == '__main__':
-    moskvorechie(['CA25050'], BRANDS['MOSKVORECHIE']['Sakura'])
+    asyncio.run(moskvorechie(['CA25050'], BRANDS['MOSKVORECHIE']['Sakura']))

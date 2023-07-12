@@ -22,11 +22,12 @@ async def get_brands(brand_name):
 async def berg(product_list: list, brand_name: str) -> dict:
 
     result_data = {}
+    brand_id = await get_brands(brand_name)
 
     for article in product_list:
 
         async with httpx.AsyncClient() as client:
-            brand_id = await get_brands(brand_name)
+
             clean_article = article.strip().replace('/', '').replace(' ', '')
             try:
                 r = await client.get(f"{BERG_CONF['url']}ordering/get_stock.json?items[0][resource_article]="
